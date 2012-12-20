@@ -22,6 +22,8 @@ module Jekyll
     attr_accessor :data, :content, :output, :ext
     attr_accessor :date, :slug, :published, :tags, :categories
 
+    attr_reader :name
+
     # Initialize this Post instance.
     #   +site+ is the Site
     #   +base+ is the String path to the dir containing the post file
@@ -36,7 +38,11 @@ module Jekyll
 
       self.categories = dir.split('/').reject { |x| x.empty? }
       self.process(name)
-      self.read_yaml(@base, name)
+      begin 
+        self.read_yaml(@base, name)
+      rescue Exception => msg
+        raise FatalException.new("#{msg} in #{@base}/#{name}")        
+      end
 
       #If we've added a date and time to the yaml, use that instead of the filename date
       #Means we'll sort correctly.
@@ -131,7 +137,7 @@ module Jekyll
           "title"      => CGI.escape(slug),
           "i_day"      => date.strftime("%d").to_i.to_s,
           "i_month"    => date.strftime("%m").to_i.to_s,
-          "categories" => categories.join('/'),
+          "categories" => categories.map { |c| URI.escape(c) }.join('/'),
           "output_ext" => self.output_ext
         }.inject(template) { |result, token|
           result.gsub(/:#{Regexp.escape token.first}/, token.last)

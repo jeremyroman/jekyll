@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'rake'
+require 'rdoc'
 require 'date'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), *%w[lib]))
@@ -62,7 +63,7 @@ task :coverage do
   sh "open coverage/index.html"
 end
 
-require 'rake/rdoctask'
+require 'rdoc/task'
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "#{name} #{version}"
@@ -119,7 +120,7 @@ task :release => :build do
     puts "You must be on the master branch to release!"
     exit!
   end
-  sh "git commit --allow-empty -a -m 'Release #{version}'"
+  sh "git commit --allow-empty -m 'Release #{version}'"
   sh "git tag v#{version}"
   sh "git push origin master"
   sh "git push origin v#{version}"
